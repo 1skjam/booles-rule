@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Theory{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="hero-label">Numerical Integration</div>
+  <h1 class="hero-title">Boole's Rule</h1>
+  <p class="hero-subtitle">
+    A powerful closed Newton–Cotes formula of degree four, achieving highly accurate approximations of definite integrals using just five equally spaced points.
+  </p>
+  <div class="hero-actions">
+    <a href="/calculator" class="btn btn-primary">Open Calculator</a>
+    <a href="/examples" class="btn btn-outline">View Examples</a>
+  </div>
+</div>
+
+<!-- What is Boole's Rule -->
+<section class="content-section">
+  <div class="section-tag">01 — Overview</div>
+  <h2 class="section-title">What is Boole's Rule?</h2>
+  <div class="prose-block">
+    <p>
+      <strong>Boole's Rule</strong> (sometimes called Bode's Rule) is a numerical method for approximating the definite integral of a function over a closed interval \([a, b]\). It belongs to the family of <em>Newton–Cotes formulas</em>, which approximate integrals by fitting a polynomial through a set of equally spaced sample points and integrating that polynomial exactly.
+    </p>
+    <p>
+      Boole's Rule uses <strong>five equally spaced points</strong> — \(x_0, x_1, x_2, x_3, x_4\) — and fits a degree-4 polynomial through them. Integrating this polynomial over \([a, b]\) yields a weighted sum of the function values at those five points.
+    </p>
+    <p>
+      It is more accurate than the Trapezoidal Rule (2 points), Simpson's 1/3 Rule (3 points), and Simpson's 3/8 Rule (4 points), making it a preferred choice when higher precision is needed without resorting to composite methods.
+    </p>
+  </div>
+</section>
+
+<!-- The Formula -->
+<section class="content-section">
+  <div class="section-tag">02 — The Formula</div>
+  <h2 class="section-title">Mathematical Formulation</h2>
+
+  <div class="formula-card">
+    <div class="formula-card-header">Step Size</div>
+    <div class="formula-display">
+      \[ h = \frac{b - a}{4} \]
+    </div>
+    <p class="formula-note">The interval \([a,b]\) is divided into 4 equal subintervals of width \(h\).</p>
+  </div>
+
+  <div class="formula-card formula-card-main">
+    <div class="formula-card-header">Boole's Rule</div>
+    <div class="formula-display">
+      \[
+        \int_a^b f(x)\,dx \;\approx\; \frac{2h}{45}
+        \Bigl[7f(x_0) + 32f(x_1) + 12f(x_2) + 32f(x_3) + 7f(x_4)\Bigr]
+      \]
+    </div>
+    <p class="formula-note">where \(x_i = a + ih\) for \(i = 0, 1, 2, 3, 4\).</p>
+  </div>
+
+  <!-- Node points table -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-card-symbol">\(x_0\)</div>
+      <div class="info-card-label">Left endpoint</div>
+      <div class="info-card-value">\(a\)</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-symbol">\(x_1\)</div>
+      <div class="info-card-label">First interior</div>
+      <div class="info-card-value">\(a + h\)</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-symbol">\(x_2\)</div>
+      <div class="info-card-label">Midpoint</div>
+      <div class="info-card-value">\(a + 2h\)</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-symbol">\(x_3\)</div>
+      <div class="info-card-label">Third interior</div>
+      <div class="info-card-value">\(a + 3h\)</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-symbol">\(x_4\)</div>
+      <div class="info-card-label">Right endpoint</div>
+      <div class="info-card-value">\(b\)</div>
+    </div>
+  </div>
+</section>
+
+<!-- Weight Breakdown -->
+<section class="content-section">
+  <div class="section-tag">03 — Weights</div>
+  <h2 class="section-title">Understanding the Weights</h2>
+  <div class="prose-block">
+    <p>
+      The coefficients \(7, 32, 12, 32, 7\) are not arbitrary — they arise from integrating the degree-4 Lagrange interpolating polynomial through the five nodes. Their sum is \(7+32+12+32+7 = 90\), and the leading factor \(\tfrac{2h}{45} = \tfrac{h}{45} \times 2\) ensures the formula is exact for polynomials up to degree 5.
+    </p>
+  </div>
+
+  <div class="weights-visual">
+    <div class="weight-bar-container">
+      {% set weights = [(7, 'x₀', 'endpoint'), (32, 'x₁', 'interior'), (12, 'x₂', 'midpoint'), (32, 'x₃', 'interior'), (7, 'x₄', 'endpoint')] %}
+      {% for w, xi, label in weights %}
+      <div class="weight-bar-group">
+        <div class="weight-bar-label">{{ w }}</div>
+        <div class="weight-bar" style="height: {{ (w / 32) * 100 }}px;" data-type="{{ label }}">
+          <div class="weight-bar-fill"></div>
+        </div>
+        <div class="weight-bar-x">\({{ xi }}\)</div>
+        <div class="weight-bar-type">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="weights-note">
+      Endpoints carry weight <strong>7</strong>, interior nodes carry <strong>32</strong>, and the midpoint carries <strong>12</strong>. The interior nodes are weighted most heavily.
+    </p>
+  </div>
+</section>
+
+<!-- Error Term -->
+<section class="content-section">
+  <div class="section-tag">04 — Error Analysis</div>
+  <h2 class="section-title">Error Term &amp; Accuracy</h2>
+  <div class="prose-block">
+    <p>
+      The truncation error for Boole's Rule on a single interval is:
+    </p>
+  </div>
+
+  <div class="formula-card">
+    <div class="formula-display">
+      \[
+        E = -\frac{8}{945} h^7 f^{(6)}(\xi), \quad \xi \in [a, b]
+      \]
+    </div>
+    <p class="formula-note">
+      The error is of order \(\mathcal{O}(h^7)\), meaning it is exact for all polynomials of degree 5 or less. This gives Boole's Rule significantly higher accuracy than Simpson's Rule (\(\mathcal{O}(h^5)\)).
+    </p>
+  </div>
+
+  <div class="comparison-table-wrap">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Points</th>
+          <th>Polynomial Degree</th>
+          <th>Error Order</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Trapezoidal Rule</td>
+          <td>2</td>
+          <td>1</td>
+          <td>\(\mathcal{O}(h^3)\)</td>
+        </tr>
+        <tr>
+          <td>Simpson's 1/3 Rule</td>
+          <td>3</td>
+          <td>2</td>
+          <td>\(\mathcal{O}(h^5)\)</td>
+        </tr>
+        <tr>
+          <td>Simpson's 3/8 Rule</td>
+          <td>4</td>
+          <td>3</td>
+          <td>\(\mathcal{O}(h^5)\)</td>
+        </tr>
+        <tr class="table-highlight">
+          <td><strong>Boole's Rule</strong></td>
+          <td><strong>5</strong></td>
+          <td><strong>4 (exact up to 5)</strong></td>
+          <td><strong>\(\mathcal{O}(h^7)\)</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="content-section cta-section">
+  <h2 class="cta-title">Ready to compute?</h2>
+  <p class="cta-text">Try the interactive calculator or study the worked examples.</p>
+  <div class="cta-actions">
+    <a href="/calculator" class="btn btn-primary btn-lg">Launch Calculator</a>
+    <a href="/examples" class="btn btn-outline btn-lg">Worked Examples</a>
+  </div>
+</section>
+{% endblock %}

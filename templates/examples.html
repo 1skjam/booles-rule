@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Worked Examples{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-sm">
+  <div class="hero-label">Step-by-Step</div>
+  <h1 class="hero-title">Worked Examples</h1>
+  <p class="hero-subtitle">
+    Two fully worked examples demonstrating Boole's Rule from setup through final answer.
+  </p>
+</div>
+
+<!-- Quick Reference -->
+<section class="content-section">
+  <div class="recall-box">
+    <div class="recall-title">Boole's Rule — Quick Reference</div>
+    <div class="recall-formula">
+      \[
+        \int_a^b f(x)\,dx \approx \frac{2h}{45}\bigl[7f(x_0)+32f(x_1)+12f(x_2)+32f(x_3)+7f(x_4)\bigr],
+        \quad h = \frac{b-a}{4}
+      \]
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EXAMPLE 1 ===================== -->
+<section class="content-section">
+  <div class="section-tag">Example 01</div>
+  <h2 class="section-title">Integrating \(f(x) = x^4\) on \([0, 2]\)</h2>
+
+  <div class="example-block">
+
+    <!-- Given -->
+    <div class="step-card">
+      <div class="step-number">Given</div>
+      <div class="step-body">
+        \[
+          f(x) = x^4, \quad a = 0, \quad b = 2
+        \]
+        <p>We want to approximate \(\displaystyle\int_0^2 x^4\,dx\).</p>
+        <p class="step-note">The exact value is \(\dfrac{x^5}{5}\Big|_0^2 = \dfrac{32}{5} = 6.4\).</p>
+      </div>
+    </div>
+
+    <!-- Step 1: h -->
+    <div class="step-card">
+      <div class="step-number">Step 1 — Compute \(h\)</div>
+      <div class="step-body">
+        \[
+          h = \frac{b - a}{4} = \frac{2 - 0}{4} = 0.5
+        \]
+      </div>
+    </div>
+
+    <!-- Step 2: nodes -->
+    <div class="step-card">
+      <div class="step-number">Step 2 — Find the Node Points</div>
+      <div class="step-body">
+        \[
+          \begin{array}{ll}
+            x_0 = a = 0 & x_1 = 0 + 0.5 = 0.5 \\[6pt]
+            x_2 = 0 + 1.0 = 1.0 & x_3 = 0 + 1.5 = 1.5 \\[6pt]
+            x_4 = b = 2.0
+          \end{array}
+        \]
+      </div>
+    </div>
+
+    <!-- Step 3: evaluate -->
+    <div class="step-card">
+      <div class="step-number">Step 3 — Evaluate \(f(x) = x^4\) at Each Node</div>
+      <div class="step-body">
+        <div class="eval-table-wrap">
+          <table class="eval-table">
+            <thead>
+              <tr><th>\(i\)</th><th>\(x_i\)</th><th>\(f(x_i) = x_i^4\)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>\(0.0\)</td><td>\(0.0^4 = \mathbf{0.0000}\)</td></tr>
+              <tr><td>1</td><td>\(0.5\)</td><td>\(0.5^4 = \mathbf{0.0625}\)</td></tr>
+              <tr><td>2</td><td>\(1.0\)</td><td>\(1.0^4 = \mathbf{1.0000}\)</td></tr>
+              <tr><td>3</td><td>\(1.5\)</td><td>\(1.5^4 = \mathbf{5.0625}\)</td></tr>
+              <tr><td>4</td><td>\(2.0\)</td><td>\(2.0^4 = \mathbf{16.0000}\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: weighted sum -->
+    <div class="step-card">
+      <div class="step-number">Step 4 — Compute the Weighted Sum</div>
+      <div class="step-body">
+        \[
+          W = 7f(x_0) + 32f(x_1) + 12f(x_2) + 32f(x_3) + 7f(x_4)
+        \]
+        \[
+          W = 7(0) + 32(0.0625) + 12(1) + 32(5.0625) + 7(16)
+        \]
+        \[
+          W = 0 + 2 + 12 + 162 + 112 = \mathbf{288}
+        \]
+      </div>
+    </div>
+
+    <!-- Step 5: apply formula -->
+    <div class="step-card">
+      <div class="step-number">Step 5 — Apply Boole's Rule</div>
+      <div class="step-body">
+        \[
+          \int_0^2 x^4\,dx \approx \frac{2h}{45} \times W = \frac{2(0.5)}{45} \times 288
+          = \frac{1}{45} \times 288 = \mathbf{6.4}
+        \]
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card">
+      <div class="result-label">Result</div>
+      <div class="result-value">\(\approx 6.4000\)</div>
+      <div class="result-exact">Exact value: \(6.4\) &nbsp;|&nbsp; Error: \(0\)</div>
+      <p class="result-note">
+        Boole's Rule is <em>exact</em> for \(f(x) = x^4\) because it is exact for all polynomials of degree ≤ 5.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== EXAMPLE 2 ===================== -->
+<section class="content-section">
+  <div class="section-tag">Example 02</div>
+  <h2 class="section-title">Integrating \(f(x) = \sin(x)\) on \([0, \pi]\)</h2>
+
+  <div class="example-block">
+
+    <!-- Given -->
+    <div class="step-card">
+      <div class="step-number">Given</div>
+      <div class="step-body">
+        \[
+          f(x) = \sin(x), \quad a = 0, \quad b = \pi
+        \]
+        <p>We want to approximate \(\displaystyle\int_0^{\pi} \sin(x)\,dx\).</p>
+        <p class="step-note">The exact value is \(-\cos(x)\Big|_0^{\pi} = -\cos(\pi) + \cos(0) = 1 + 1 = 2\).</p>
+      </div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="step-card">
+      <div class="step-number">Step 1 — Compute \(h\)</div>
+      <div class="step-body">
+        \[
+          h = \frac{\pi - 0}{4} = \frac{\pi}{4} \approx 0.7854
+        \]
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+      <div class="step-number">Step 2 — Find the Node Points</div>
+      <div class="step-body">
+        \[
+          \begin{array}{ll}
+            x_0 = 0 & x_1 = \dfrac{\pi}{4} \approx 0.7854 \\[10pt]
+            x_2 = \dfrac{\pi}{2} \approx 1.5708 & x_3 = \dfrac{3\pi}{4} \approx 2.3562 \\[10pt]
+            x_4 = \pi \approx 3.1416
+          \end{array}
+        \]
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card">
+      <div class="step-number">Step 3 — Evaluate \(f(x) = \sin(x)\) at Each Node</div>
+      <div class="step-body">
+        <div class="eval-table-wrap">
+          <table class="eval-table">
+            <thead>
+              <tr><th>\(i\)</th><th>\(x_i\)</th><th>\(f(x_i) = \sin(x_i)\)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>\(0\)</td><td>\(\sin(0) = \mathbf{0.0000}\)</td></tr>
+              <tr><td>1</td><td>\(\pi/4\)</td><td>\(\sin(\pi/4) = \mathbf{0.7071}\)</td></tr>
+              <tr><td>2</td><td>\(\pi/2\)</td><td>\(\sin(\pi/2) = \mathbf{1.0000}\)</td></tr>
+              <tr><td>3</td><td>\(3\pi/4\)</td><td>\(\sin(3\pi/4) = \mathbf{0.7071}\)</td></tr>
+              <tr><td>4</td><td>\(\pi\)</td><td>\(\sin(\pi) = \mathbf{0.0000}\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step-card">
+      <div class="step-number">Step 4 — Compute the Weighted Sum</div>
+      <div class="step-body">
+        \[
+          W = 7(0) + 32(0.7071) + 12(1) + 32(0.7071) + 7(0)
+        \]
+        \[
+          W = 0 + 22.6274 + 12 + 22.6274 + 0 = \mathbf{57.2548}
+        \]
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step-card">
+      <div class="step-number">Step 5 — Apply Boole's Rule</div>
+      <div class="step-body">
+        \[
+          \int_0^{\pi} \sin(x)\,dx \approx \frac{2h}{45} \times W
+          = \frac{2 \cdot \tfrac{\pi}{4}}{45} \times 57.2548
+          = \frac{\pi}{90} \times 57.2548
+        \]
+        \[
+          = 0.034907 \times 57.2548 \approx \mathbf{1.9998}
+        \]
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card">
+      <div class="result-label">Result</div>
+      <div class="result-value">\(\approx 1.9998\)</div>
+      <div class="result-exact">Exact value: \(2.0000\) &nbsp;|&nbsp; Error: \(\approx 0.0002\)</div>
+      <p class="result-note">
+        Boole's Rule yields an excellent approximation of \(\sin(x)\) with a relative error of only <strong>0.01%</strong> — impressive for just five function evaluations.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="content-section cta-section">
+  <h2 class="cta-title">Try your own function</h2>
+  <p class="cta-text">Use the interactive calculator to apply Boole's Rule to any function of your choice.</p>
+  <div class="cta-actions">
+    <a href="/calculator" class="btn btn-primary btn-lg">Open Calculator</a>
+    <a href="/" class="btn btn-outline btn-lg">Review Theory</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}Calculator{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-sm">
+  <div class="hero-label">Interactive Tool</div>
+  <h1 class="hero-title">Boole's Rule Calculator</h1>
+  <p class="hero-subtitle">
+    Enter any function and interval to compute the numerical integral step-by-step.
+  </p>
+</div>
+
+<section class="content-section">
+  <!-- Input Form -->
+  <div class="calc-layout">
+    <div class="calc-input-panel">
+      <div class="panel-title">Input</div>
+
+      <div class="input-group">
+        <label class="input-label" for="func">
+          Function \(f(x)\)
+          <span class="input-hint">Use Python math syntax: <code>sin(x)</code>, <code>x**2</code>, <code>exp(x)</code>, <code>log(x)</code></span>
+        </label>
+        <div class="input-wrap">
+          <span class="input-prefix">f(x) =</span>
+          <input type="text" id="func" class="calc-input" placeholder="e.g. sin(x), x**4, exp(-x**2)" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label class="input-label" for="lower">Lower Bound \(a\)</label>
+          <input type="text" id="lower" class="calc-input" placeholder="e.g. 0 or -pi" autocomplete="off" />
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="upper">Upper Bound \(b\)</label>
+          <input type="text" id="upper" class="calc-input" placeholder="e.g. 2 or pi" autocomplete="off" />
+        </div>
+      </div>
+
+      <button id="computeBtn" class="btn btn-primary btn-full">
+        <span class="btn-icon">∫</span>
+        Compute Integral
+      </button>
+
+      <!-- Quick examples -->
+      <div class="quick-examples">
+        <div class="qe-label">Quick examples:</div>
+        <div class="qe-chips">
+          <button class="qe-chip" data-func="x**4" data-a="0" data-b="2">x⁴ on [0,2]</button>
+          <button class="qe-chip" data-func="sin(x)" data-a="0" data-b="pi">sin(x) on [0,π]</button>
+          <button class="qe-chip" data-func="exp(x)" data-a="0" data-b="1">eˣ on [0,1]</button>
+          <button class="qe-chip" data-func="1/(1+x**2)" data-a="0" data-b="1">1/(1+x²) on [0,1]</button>
+          <button class="qe-chip" data-func="sqrt(x)" data-a="0" data-b="4">√x on [0,4]</button>
+          <button class="qe-chip" data-func="cos(x)**2" data-a="0" data-b="pi">cos²(x) on [0,π]</button>
+        </div>
+      </div>
+
+      <!-- Allowed functions reference -->
+      <details class="func-ref">
+        <summary>Supported functions &amp; constants</summary>
+        <div class="func-ref-body">
+          <div class="func-ref-group">
+            <div class="func-ref-title">Trig</div>
+            <code>sin, cos, tan, asin, acos, atan</code>
+          </div>
+          <div class="func-ref-group">
+            <div class="func-ref-title">Hyperbolic</div>
+            <code>sinh, cosh, tanh</code>
+          </div>
+          <div class="func-ref-group">
+            <div class="func-ref-title">Exp / Log</div>
+            <code>exp, log, log10, sqrt</code>
+          </div>
+          <div class="func-ref-group">
+            <div class="func-ref-title">Constants</div>
+            <code>pi, e</code>
+          </div>
+          <div class="func-ref-group">
+            <div class="func-ref-title">Power</div>
+            <code>x**n</code> (use <code>**</code> not <code>^</code>)
+          </div>
+        </div>
+      </details>
+
+      <!-- Error display -->
+      <div class="error-box" id="errorBox" hidden></div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="calc-results-panel" id="resultsPanel" hidden>
+      <div class="panel-title">
+        Step-by-Step Solution
+        <button class="copy-btn" id="copyBtn" title="Copy results">⧉ Copy</button>
+      </div>
+
+      <div id="resultsContent"></div>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div class="loading" id="loading" hidden>
+    <div class="loading-spinner"></div>
+    <span>Computing…</span>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const funcInput   = document.getElementById('func');
+const lowerInput  = document.getElementById('lower');
+const upperInput  = document.getElementById('upper');
+const computeBtn  = document.getElementById('computeBtn');
+const resultsPanel = document.getElementById('resultsPanel');
+const resultsContent = document.getElementById('resultsContent');
+const errorBox    = document.getElementById('errorBox');
+const loading     = document.getElementById('loading');
+const copyBtn     = document.getElementById('copyBtn');
+
+// Quick-example chips
+document.querySelectorAll('.qe-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    funcInput.value  = chip.dataset.func;
+    lowerInput.value = chip.dataset.a;
+    upperInput.value = chip.dataset.b;
+    funcInput.focus();
+  });
+});
+
+// Allow Enter key to trigger compute
+[funcInput, lowerInput, upperInput].forEach(el => {
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') computeBtn.click(); });
+});
+
+function fmt(n, decimals = 6) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toFixed(decimals);
+}
+
+function pct(n) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toFixed(4) + '%';
+}
+
+function buildResults(s) {
+  // Build LaTeX-rich HTML for the step-by-step display
+  let html = `
+  <div class="result-step">
+    <div class="rs-label">Given</div>
+    <div class="rs-math">
+      \\[f(x) = \\texttt{${s.f_expr}}, \\quad a = ${fmt(s.a, 4)}, \\quad b = ${fmt(s.b, 4)}\\]
+    </div>
+  </div>
+
+  <div class="result-step">
+    <div class="rs-label">Step 1 — Step Size</div>
+    <div class="rs-math">
+      \\[h = \\frac{b - a}{4} = \\frac{${fmt(s.b, 4)} - ${fmt(s.a, 4)}}{4} = ${fmt(s.h, 6)}\\]
+    </div>
+  </div>
+
+  <div class="result-step">
+    <div class="rs-label">Step 2 — Node Points</div>
+    <div class="rs-math">
+      \\[\\begin{array}{ll}
+        x_0 = ${fmt(s.x0, 6)} & x_1 = ${fmt(s.x1, 6)} \\\\[4pt]
+        x_2 = ${fmt(s.x2, 6)} & x_3 = ${fmt(s.x3, 6)} \\\\[4pt]
+        x_4 = ${fmt(s.x4, 6)}
+      \\end{array}\\]
+    </div>
+  </div>
+
+  <div class="result-step">
+    <div class="rs-label">Step 3 — Function Evaluations</div>
+    <div class="rs-table-wrap">
+      <table class="rs-table">
+        <thead><tr><th>\\(i\\)</th><th>\\(x_i\\)</th><th>Weight</th><th>\\(f(x_i)\\)</th><th>Weighted</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>\\(${fmt(s.x0,4)}\\)</td><td>7</td><td>\\(${fmt(s.fx0,6)}\\)</td><td>\\(${fmt(7*s.fx0,6)}\\)</td></tr>
+          <tr><td>1</td><td>\\(${fmt(s.x1,4)}\\)</td><td>32</td><td>\\(${fmt(s.fx1,6)}\\)</td><td>\\(${fmt(32*s.fx1,6)}\\)</td></tr>
+          <tr><td>2</td><td>\\(${fmt(s.x2,4)}\\)</td><td>12</td><td>\\(${fmt(s.fx2,6)}\\)</td><td>\\(${fmt(12*s.fx2,6)}\\)</td></tr>
+          <tr><td>3</td><td>\\(${fmt(s.x3,4)}\\)</td><td>32</td><td>\\(${fmt(s.fx3,6)}\\)</td><td>\\(${fmt(32*s.fx3,6)}\\)</td></tr>
+          <tr><td>4</td><td>\\(${fmt(s.x4,4)}\\)</td><td>7</td><td>\\(${fmt(s.fx4,6)}\\)</td><td>\\(${fmt(7*s.fx4,6)}\\)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="result-step">
+    <div class="rs-label">Step 4 — Weighted Sum</div>
+    <div class="rs-math">
+      \\[W = 7f_0 + 32f_1 + 12f_2 + 32f_3 + 7f_4 = ${fmt(s.weighted_sum, 6)}\\]
+    </div>
+  </div>
+
+  <div class="result-step">
+    <div class="rs-label">Step 5 — Apply Boole's Rule</div>
+    <div class="rs-math">
+      \\[\\int_{${fmt(s.a,4)}}^{${fmt(s.b,4)}} f(x)\\,dx \\approx
+      \\frac{2h}{45} \\times W = \\frac{2 \\times ${fmt(s.h,4)}}{45} \\times ${fmt(s.weighted_sum,4)}
+      = ${fmt(s.coefficient,6)} \\times ${fmt(s.weighted_sum,4)}\\]
+    </div>
+  </div>
+  `;
+
+  // Final answer
+  html += `<div class="rs-answer">
+    <div class="rs-answer-label">Boole's Rule Result</div>
+    <div class="rs-answer-value">\\(\\approx ${fmt(s.result, 8)}\\)</div>
+  `;
+
+  if (s.exact !== undefined && s.exact !== null) {
+    html += `
+    <div class="rs-exact-row">
+      <span class="rs-exact-label">Exact (SymPy):</span>
+      <span class="rs-exact-val">${fmt(s.exact, 8)}</span>
+    </div>
+    <div class="rs-exact-row">
+      <span class="rs-exact-label">Absolute Error:</span>
+      <span class="rs-exact-val">${fmt(s.error, 2e-8 < s.error ? 8 : 10)}</span>
+    </div>`;
+    if (s.relative_error !== null) {
+      html += `<div class="rs-exact-row">
+        <span class="rs-exact-label">Relative Error:</span>
+        <span class="rs-exact-val">${pct(s.relative_error)}</span>
+      </div>`;
+    }
+  }
+  html += `</div>`;
+
+  return html;
+}
+
+computeBtn.addEventListener('click', async () => {
+  const f = funcInput.value.trim();
+  const a = lowerInput.value.trim();
+  const b = upperInput.value.trim();
+
+  // Clear previous
+  errorBox.hidden = true;
+  errorBox.textContent = '';
+  resultsPanel.hidden = true;
+
+  loading.hidden = false;
+  computeBtn.disabled = true;
+
+  try {
+    const res = await fetch('/compute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ function: f, a, b })
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      errorBox.hidden = false;
+      errorBox.innerHTML = data.errors.map(e => `<div>⚠ ${e}</div>`).join('');
+    } else {
+      resultsContent.innerHTML = buildResults(data.steps);
+      resultsPanel.hidden = false;
+      // Re-render MathJax
+      if (window.MathJax) {
+        await MathJax.typesetPromise([resultsContent]);
+      }
+    }
+  } catch (err) {
+    errorBox.hidden = false;
+    errorBox.textContent = 'Network error. Please try again.';
+  } finally {
+    loading.hidden = true;
+    computeBtn.disabled = false;
+  }
+});
+
+// Copy button
+copyBtn.addEventListener('click', () => {
+  const text = resultsContent.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    copyBtn.textContent = '✓ Copied!';
+    setTimeout(() => { copyBtn.innerHTML = '⧉ Copy'; }, 2000);
+  });
+});
+</script>
+{% endblock %}
