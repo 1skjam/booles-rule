@@ -41,7 +41,7 @@
 /* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; font-size: 18px; }
+html { scroll-behavior: smooth; font-size: 18px; overflow-x: hidden; }
 
 body {
   background: var(--bg);
@@ -50,6 +50,7 @@ body {
   font-size: 1rem;
   line-height: 1.75;
   min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -868,23 +869,186 @@ body {
 
 .footer-formula { font-size: 0.9rem; color: var(--text-subtle); }
 
-/* ---- Responsive ---- */
+/* ================================================================
+   RESPONSIVE — Mobile First fixes
+   ================================================================ */
+
+/* Make ALL math/formula containers scrollable horizontally
+   so equations never overflow or overlap on narrow screens    */
+.formula-display,
+.formula-card,
+.recall-box,
+.step-body,
+.rs-math {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* MathJax root elements must not clip */
+mjx-container {
+  max-width: 100%;
+  overflow-x: auto;
+  display: block !important;
+}
+
+/* Tables always scroll rather than overflow */
+.comparison-table-wrap,
+.eval-table-wrap,
+.rs-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-sm);
+}
+
+/* ---- 960px — Tablet landscape ---- */
 @media (max-width: 960px) {
   .calc-layout { grid-template-columns: 1fr; }
-  .info-grid { grid-template-columns: repeat(3, 1fr); }
+  .info-grid   { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* ---- 720px — Tablet portrait ---- */
 @media (max-width: 720px) {
-  :root { --section-gap: 56px; }
-  .nav-links { display: none; flex-direction: column; position: absolute; top: var(--nav-h); left: 0; right: 0; background: var(--bg); padding: 16px 24px; border-bottom: 1px solid var(--border); }
+  :root {
+    --section-gap: 48px;
+    --nav-h: 56px;
+  }
+
+  html { font-size: 16px; }
+
+  /* Nav — collapse to hamburger */
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    position: absolute;
+    top: var(--nav-h);
+    left: 0; right: 0;
+    background: rgba(13, 15, 20, 0.98);
+    padding: 14px 20px 18px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
   .nav-links.open { display: flex; }
-  .nav-toggle { display: flex; }
-  .info-grid { grid-template-columns: repeat(2, 1fr); }
-  .weight-bar-container { gap: 14px; }
+  .nav-toggle     { display: flex; }
+
+  /* Nav toggle animation */
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-link { padding: 10px 14px; font-size: 0.82rem; }
+
+  /* Hero */
+  .page-hero    { padding: 52px 0 40px; }
+  .page-hero-sm { padding: 40px 0 28px; }
+  .hero-title   { font-size: clamp(1.9rem, 8vw, 2.8rem); }
+  .hero-subtitle { font-size: 1rem; }
+
+  /* Main padding */
+  .main-content { padding: 0 16px 60px; }
+
+  /* Info grid: 5 → 3 */
+  .info-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .info-card { padding: 12px 8px; }
+  .info-card-label { font-size: 0.55rem; }
+
+  /* Formula cards */
+  .formula-card { padding: 18px 16px; }
+
+  /* Weight bars — reduce gap and bar width */
+  .weights-visual { padding: 20px 14px; }
+  .weight-bar-container { gap: 10px; height: 110px; }
+  .weight-bar { width: 28px; }
+  .weight-bar-label { font-size: 0.68rem; }
+  .weight-bar-x    { font-size: 0.72rem; }
+  .weight-bar-type { display: none; } /* hide on small screens */
+
+  /* Step cards */
+  .step-card  { padding: 16px 14px; }
+  .result-card { padding: 20px 16px; }
+  .result-value { font-size: 1.7rem; }
+
+  /* Calculator */
+  .calc-input-panel,
+  .calc-results-panel { padding: 18px 16px; }
+
+  /* rs-exact rows stack on narrow */
+  .rs-exact-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* CTA section */
+  .cta-section { padding: 40px 16px; }
+  .cta-title   { font-size: 1.5rem; }
+
+  /* Footer formula — hide on small to avoid overflow */
+  .footer-formula { display: none; }
 }
 
+/* ---- 480px — Mobile portrait ---- */
 @media (max-width: 480px) {
-  .hero-title { font-size: 2.2rem; }
+  html { font-size: 15px; }
+
+  .main-content { padding: 0 12px 48px; }
+
+  /* Hero */
+  .hero-title    { font-size: clamp(1.7rem, 9vw, 2.2rem); }
+  .hero-subtitle { font-size: 0.95rem; }
+  .hero-actions  { flex-direction: column; align-items: stretch; }
+  .hero-actions .btn { justify-content: center; }
+
+  /* Info grid: 3 → 2 × 3 */
   .info-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Weight bars — even tighter */
+  .weight-bar-container { gap: 6px; height: 90px; }
+  .weight-bar { width: 22px; }
+  .weight-bar-label { font-size: 0.6rem; }
+
+  /* Comparison table font */
+  .comparison-table th,
+  .comparison-table td { padding: 8px 10px; font-size: 0.8rem; }
+
+  /* Eval table */
+  .eval-table th,
+  .eval-table td { padding: 7px 8px; font-size: 0.75rem; }
+
+  /* rs-table */
+  .rs-table th,
+  .rs-table td { padding: 6px 8px; font-size: 0.72rem; }
+
+  /* Input row: side-by-side → stacked */
   .input-row { grid-template-columns: 1fr; }
+
+  /* Input prefix shrink */
+  .input-prefix { font-size: 0.7rem; padding: 10px 8px; }
+  .calc-input   { font-size: 0.82rem; }
+
+  /* Quick example chips — smaller */
+  .qe-chip { font-size: 0.62rem; padding: 5px 9px; }
+
+  /* Result answer */
+  .rs-answer       { padding: 18px 14px; }
+  .rs-answer-value { font-size: 1.5rem; }
+
+  /* Buttons full-width in CTAs */
+  .cta-actions { flex-direction: column; align-items: stretch; }
+  .cta-actions .btn { justify-content: center; }
+
+  /* Section title smaller */
+  .section-title { font-size: 1.35rem; }
+}
+
+/* ---- 360px — Very small phones ---- */
+@media (max-width: 360px) {
+  html { font-size: 14px; }
+  .main-content { padding: 0 10px 40px; }
+  .info-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .info-card { padding: 10px 6px; }
+  .formula-card { padding: 14px 10px; }
+  .step-card    { padding: 12px 10px; }
+  .weight-bar-container { gap: 4px; }
+  .weight-bar { width: 18px; }
 }
