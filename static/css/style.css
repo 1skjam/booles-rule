@@ -762,6 +762,56 @@ body {
   margin-bottom: 12px;
 }
 
+/* Inline a=, b= chips under Given */
+.rs-inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.rs-inline-chip {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Node points grid — 5 boxes */
+.rs-nodes-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.rs-node {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rs-node-label {
+  font-size: 0.85rem;
+  color: var(--gold);
+}
+
+.rs-node-val {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
 .rs-label {
   font-family: var(--font-mono);
   font-size: 0.62rem;
@@ -972,7 +1022,8 @@ mjx-container {
   .calc-input-panel,
   .calc-results-panel { padding: 18px 16px; }
 
-  /* rs-exact rows stack on narrow */
+  /* Node grid: 5 → 3+2 on tablet */
+  .rs-nodes-grid { grid-template-columns: repeat(3, 1fr); }
   .rs-exact-row {
     flex-direction: column;
     align-items: center;
@@ -1018,6 +1069,9 @@ mjx-container {
   /* rs-table */
   .rs-table th,
   .rs-table td { padding: 6px 8px; font-size: 0.72rem; }
+
+  /* Node grid → 2 columns on phone */
+  .rs-nodes-grid { grid-template-columns: repeat(2, 1fr); }
 
   /* Input row: side-by-side → stacked */
   .input-row { grid-template-columns: 1fr; }
